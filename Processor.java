@@ -21,30 +21,37 @@ public class Processor {
         String time = line[0];
         String resource = line[1];
         Long bytes = Long.parseLong(line[2]);
-
+        
+        totalBytesRequested += bytes;
+        
         addToMap(time, resource, bytes);
     }
 
     private void addToMap(String time, String resource, Long bytes) {
-        totalBytesRequested += bytes;
         RequestData newRegis = new RequestData(time, bytes);
-        mapResourceToRequestData.put( resource, newRegis);        
+        mapResourceToRequestData.put(resource, newRegis);
         mapRequestsToNumberOfRequests.put(resource, mapRequestsToNumberOfRequests.getOrDefault(resource, 0L) + 1);        
     }
 
-    public Long getTotalBytesSaved() {
-        long result = 0;
+    public Result getTotalBytes() {
+        Result result = new Result(0L, 0L);
 
         for (Map.Entry<String, RequestData> map: mapResourceToRequestData.entrySet()) {
             long numberOfRequestsSaved = mapRequestsToNumberOfRequests.get(map.getKey()) - 1;
             long resourceBytes = map.getValue().getBytes();
-            result += numberOfRequestsSaved * resourceBytes;            
+            result.saved += numberOfRequestsSaved * resourceBytes;
+
+            result.cached += resourceBytes;
         }
         return result;    
     } 
 
     public long getTotalBytesRequested() {
         return totalBytesRequested;
+    }
+
+    public long getTotalBytesInCache() {
+        return 0L;
     }
     
 }
